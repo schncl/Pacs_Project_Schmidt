@@ -36,3 +36,44 @@ class MatDataset:
 
         self.data = cleaned
         self._loaded = True
+        
+
+    def validate(self) -> None:
+        """Check whether the dataset is loaded and non-empty."""
+        if not self._loaded:
+            raise RuntimeError("Dataset not loaded")
+        if not self.data:
+            raise ValueError("Dataset is empty")
+
+
+
+    @staticmethod
+    def _to_column(arr):
+        """Ensure arr has shape (N, 1)."""
+        arr = np.asarray(arr)
+        return arr.reshape(-1, 1) if arr.ndim == 1 else arr
+
+    def prepare_ml_data(
+        self,
+        input_fields: List[str],
+        target_fields: List[str],
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Convert raw data into numpy arrays.
+
+        Returns:
+            X: shape (N, n_input_features)
+            Y: shape (N, n_target_features)
+        """
+        self.validate()
+
+        X = np.hstack([self._to_column(self.data[f]) for f in input_fields])
+        Y = np.hstack([self._to_column(self.data[f]) for f in target_fields])
+
+        if X.shape[0] != Y.shape[0]:
+            raise ValueError("Inputs and targets have different number of rows")
+
+        return X, Y
+
+
+

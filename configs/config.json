@@ -1,0 +1,6 @@
+{
+    "dataset_file": "poisson_dataset_kxky.mat",
+    "input_fields": ["kx","ky"],
+    "target_fields": ["deg_x","deg_y"]
+    
+}
