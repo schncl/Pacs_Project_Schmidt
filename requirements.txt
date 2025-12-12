@@ -2,4 +2,6 @@ numpy
 mat73
 json
 abc
+sklearn
+torch
 

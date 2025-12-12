@@ -1,6 +1,15 @@
 {
-    "dataset_file": "poisson_dataset_kxky.mat",
+    "dataset_file": "heat_dataset_sine_continuous_direct_params.mat",
     "input_fields": ["kx","ky"],
-    "target_fields": ["deg_x","deg_y"]
+    "target_fields": ["deg_x","deg_y"],
+
+
+    "neural_network": {
+        "epochs": 5000,
+        "batch_size": 32,
+        "learning_rate": 0.001,
+        "hidden_layers": [64, 128],
+        "dropout_rate": 0.2
+      }
     
 }
