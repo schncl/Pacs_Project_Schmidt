@@ -1,5 +1,5 @@
-from modelnn import ModelNN
-from modelGPC import GPModel    
+from modelnn import ModelNN   
+from modelGPC import GPModel
 from config import load_config
 from dataset import MatDataset
 
@@ -25,5 +25,11 @@ if __name__ == "__main__":
 
     model.save("model_family1.pt")
 
+    model2=GPModel(config['gaussian_process'])
 
+    X_test,Y_test=model2.train_model(X, Y)
+    result_gp = model2.predict(X_test)
+    print(result_gp)
+
+    model2.save("model_family1_GPC.joblib")
 
