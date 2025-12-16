@@ -6,6 +6,10 @@ import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import seaborn as sns
+
 
 
 
@@ -206,6 +210,7 @@ class ModelNN(BaseModel):
 
     def load(self, filepath):
         """Load a saved model"""
+
         checkpoint = torch.load(filepath, map_location='cpu')  
 
 
@@ -238,4 +243,215 @@ class ModelNN(BaseModel):
         self.loss_function = config.get('loss_function', 'cross_entropy')
         self.is_trained = True
 
+    def plot_training(self):
+        """Plot of the training loss"""
+
+        plt.plot(self.history['train_losses'])
+        plt.title('Training Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.show()
+
+
+    def plot_confusions(self, X_test, Y_test, target_names=None):
+        """Plot confusion matrices"""
+        
+        if not self.is_trained:
+            raise ValueError("Model not trained")
+
+        self.model.eval()
+        with torch.no_grad():
+            X_scaled = self.scaler.transform(X_test)
+            X_tensor = torch.FloatTensor(X_scaled)
+            predictions = self.model(X_tensor)
+
+        if not isinstance(predictions, (list, tuple)):
+            predictions = [predictions]
+
+        n_targets = len(predictions)
+        fig, axes = plt.subplots(1, n_targets, figsize=(5 * n_targets, 4))
+        if n_targets == 1:
+            axes = [axes]
+
+        for i, (pred, ax) in enumerate(zip(predictions, axes)):
+            y_true = Y_test[:, i].astype(int)
+            y_pred = torch.argmax(pred, dim=1).numpy().astype(int)
+
+
+            if self.label_mappings and i in self.label_mappings:
+                reverse_mapping = {v: k for k, v in self.label_mappings[i].items()}
+                y_true = np.array([reverse_mapping[v] if v in reverse_mapping else v for v in y_true])
+                y_pred = np.array([reverse_mapping[v] if v in reverse_mapping else v for v in y_pred])
+
+            classes = np.unique(np.concatenate([y_true, y_pred]))
+            cm = confusion_matrix(y_true, y_pred, labels=classes)
+
+            sns.heatmap(cm, annot=True, fmt='d', ax=ax,
+                        xticklabels=classes, yticklabels=classes,
+                        cmap="Blues")
+
+            name = target_names[i] if target_names else f"Target {i}"
+            ax.set_title(f'Confusion Matrix - {name}')
+            ax.set_xlabel('Predicted')
+            ax.set_ylabel('True')
+
+        plt.tight_layout()
+        plt.show()
+
+
+
+    def compute_metrics(self, X_test, Y_test, target_names=None):
+        """Compute accuracy and classification reports"""
+      
+        if not self.is_trained:
+            raise ValueError("Model not trained")
+
+        self.model.eval()
+        with torch.no_grad():
+            X_scaled = self.scaler.transform(X_test)
+            X_tensor = torch.FloatTensor(X_scaled)
+            predictions = self.model(X_tensor)
+
+        if not isinstance(predictions, (list, tuple)):
+            predictions = [predictions]
+
+        accuracies = []
+        all_correct = np.ones(len(X_test), dtype=bool)
+
+        print("\n" + "=" * 50)
+        print("NEURAL NETWORK METRICS")
+        print("=" * 50)
+
+        for i, pred in enumerate(predictions):
+            y_true = Y_test[:, i].astype(int)
+            y_pred = torch.argmax(pred, dim=1).numpy().astype(int)
+
+         
+            if self.label_mappings and i in self.label_mappings:
+                reverse_mapping = {v: k for k, v in self.label_mappings[i].items()}
+                y_true = np.array([reverse_mapping.get(v, v) for v in y_true])
+                y_pred = np.array([reverse_mapping.get(v, v) for v in y_pred])
+
+            accuracy = accuracy_score(y_true, y_pred)
+            accuracies.append(accuracy)
+            all_correct &= (y_true == y_pred)
+
+            name = target_names[i] if target_names else f"Target_{i}"
+            print(f"\n{name} Accuracy: {accuracy:.3f}")
+            print(f"{name} Classification Report:")
+            print(classification_report(y_true, y_pred, zero_division=0))
+
+        overall_accuracy = all_correct.mean()
+        print(f"\nOverall Accuracy (all targets correct per sample): {overall_accuracy:.3f}")
+        print("=" * 50)
+
+        return {'accuracies': accuracies, 'overall_accuracy': overall_accuracy}
+
+
+    def visualize_predictions(self, resolution=100):
+        """Visualize NN predictions for 1D or 2D inputs."""
+        if not self.is_trained:
+            print("Model must be trained before visualization.")
+            return
+
+        n_features = len(self.input_min)
+        if n_features == 1:
+            self._visualize_1d(resolution)
+        elif n_features == 2:
+            self._visualize_2d(resolution)
+        else:
+            print(f"Visualization not supported for {n_features} features.")
+
+
+    def _visualize_1d(self, resolution=100):
+        x_grid = np.linspace(self.input_min[0], self.input_max[0], resolution)
+        X_scaled = self.scaler.transform(x_grid.reshape(-1, 1))
+        X_tensor = torch.FloatTensor(X_scaled)
+        
+        self.model.eval()
+        with torch.no_grad():
+            outputs = self.model(X_tensor)
+        
+        n_targets = len(outputs)
+        fig, axes = plt.subplots(2, n_targets, figsize=(5*n_targets, 8))
+        if n_targets == 1:
+            axes = axes.reshape(2, 1)
+
+        for i, pred in enumerate(outputs):
+            probs = torch.softmax(pred, dim=1).numpy()
+            classes = probs.argmax(axis=1)
+            confidence = probs.max(axis=1)
+
+            
+            if self.label_mappings and i in self.label_mappings:
+                reverse_map = {v: k for k, v in self.label_mappings[i].items()}
+                classes = np.array([reverse_map[c] for c in classes])
+
+        
+            axes[0, i].plot(x_grid, classes, 'o-', markersize=3)
+            axes[0, i].set_title(f'Target {i} Predictions')
+            axes[0, i].set_xlabel('Feature')
+            axes[0, i].set_ylabel('Class')
+
+        
+            axes[1, i].plot(x_grid, confidence, 'r-', markersize=3)
+            axes[1, i].set_title(f'Target {i} Confidence')
+            axes[1, i].set_xlabel('Feature')
+            axes[1, i].set_ylabel('Confidence')
+            axes[1, i].set_ylim(0, 1)
+
+        plt.tight_layout()
+        plt.show()
+
+
+    def _visualize_2d(self, resolution=100):
+        x1 = np.linspace(self.input_min[0], self.input_max[0], resolution)
+        x2 = np.linspace(self.input_min[1], self.input_max[1], resolution)
+        xx, yy = np.meshgrid(x1, x2)
+        X_grid = np.column_stack([xx.ravel(), yy.ravel()])
+        
+        X_scaled = self.scaler.transform(X_grid)
+        X_tensor = torch.FloatTensor(X_scaled)
+        
+        self.model.eval()
+        with torch.no_grad():
+            outputs = self.model(X_tensor)
+
+        n_targets = len(outputs)
+        fig, axes = plt.subplots(2, n_targets, figsize=(5*n_targets, 10))
+        if n_targets == 1:
+            axes = axes.reshape(2, 1)
+
+        for i, pred in enumerate(outputs):
+            probs = torch.softmax(pred, dim=1).numpy()
+            classes = probs.argmax(axis=1).reshape(resolution, resolution)
+            confidence = probs.max(axis=1).reshape(resolution, resolution)
+
+
+            if self.label_mappings and i in self.label_mappings:
+                reverse_map = {v: k for k, v in self.label_mappings[i].items()}
+                classes = np.vectorize(reverse_map.get)(classes)
+
+          
+            im1 = axes[0, i].imshow(classes, origin='lower',
+                                    extent=[self.input_min[0], self.input_max[0],
+                                            self.input_min[1], self.input_max[1]],
+                                    cmap='coolwarm', aspect='auto')
+            axes[0, i].set_title(f'Target {i} Predictions')
+            axes[0, i].set_xlabel('Feature 1')
+            axes[0, i].set_ylabel('Feature 2')
+            plt.colorbar(im1, ax=axes[0, i])
+
+         
+            im2 = axes[1, i].imshow(confidence, origin='lower',
+                                    extent=[self.input_min[0], self.input_max[0],
+                                            self.input_min[1], self.input_max[1]],
+                                    cmap='hot', vmin=0, vmax=1, aspect='auto')
+            axes[1, i].set_title(f'Target {i} Confidence')
+            axes[1, i].set_xlabel('Feature 1')
+            axes[1, i].set_ylabel('Feature 2')
+            plt.colorbar(im2, ax=axes[1, i])
+
+        plt.tight_layout()
+        plt.show()
 

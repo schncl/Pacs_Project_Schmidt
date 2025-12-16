@@ -23,13 +23,24 @@ if __name__ == "__main__":
     result = model.predict(X_test)
     print(result)
 
+    model.plot_training()
+    model.plot_confusions(X_test,Y_test,target_names)
+    metrics = model.compute_metrics(X_test,Y_test,target_names)
+    model.visualize_predictions()
+
+
     model.save("model_family1.pt")
 
     model2=GPModel(config['gaussian_process'])
 
     X_test,Y_test=model2.train_model(X, Y)
+
     result_gp = model2.predict(X_test)
     print(result_gp)
+    
+    model2.plot_confusions(X_test,Y_test,target_names)
+    metrics2=model2.compute_metrics(X_test,Y_test,target_names)
+    model2.visualize_predictions()
 
     model2.save("model_family1_GPC.joblib")
 
