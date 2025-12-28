@@ -1,15 +1,22 @@
 {
-    "dataset_path": "../heat_dataset_sine_anisotropic.mat",
+    "dataset_path": "../data/heat_dataset_sine_anisotropic.mat",
     "input_fields": ["kx","ky"],
     "target_fields": ["deg_x","deg_y"],
     
+    "model":"nn", 
+    "plots":false,
+    "save_model":true,
+    "path_to_model_nn":"../models/model_family1.pt",
+    "path_to_model_gp": "../models/model_family1_GPC.joblib",
+
 
     "neural_network": {
         "epochs": 5000,
         "batch_size": 32,
         "learning_rate": 0.001,
         "hidden_layers": [64, 128],
-        "dropout_rate": 0.2
+        "dropout_rate": 0.2,
+        "verbose": false
       },
     
 

@@ -14,10 +14,6 @@ def parse_args():
         type=str,
         default="../configs/config.json"
     )
-    parser.add_argument(
-        "--plots",
-        default=False
-    )
     return parser.parse_args()
 
 
@@ -32,33 +28,36 @@ def main():
     X,Y = dataset.prepare_ml_data( config['input_fields'], config['target_fields'])
     target_names = config['target_fields']
 
+    if config["model"] in ["nn","both"]:
     
-    model = ModelNN(config['neural_network'])
+        model = ModelNN(config['neural_network'])
 
 
-    X_test,Y_test = model.train_model(X, Y)
+        X_test,Y_test = model.train_model(X, Y)
 
-  
-    if  args.plots:
-        model.plot_training()
-        model.plot_confusions(X_test,Y_test,target_names)
-        model.visualize_predictions()
     
-    metrics = model.compute_metrics(X_test,Y_test,target_names)
-
-    model.save("model_family1.pt")
+        if  config["plots"]:
+            model.plot_training()
+            model.plot_confusions(X_test,Y_test,target_names)
+            model.visualize_predictions()
+        
+        metrics = model.compute_metrics(X_test,Y_test,target_names)
+        if config["save_model"]:
+            model.save(config["path_to_model_nn"])
     
-    model2=GPModel(config['gaussian_process'])
+    if config["model"] in ["gp","both"]:
+        model2=GPModel(config['gaussian_process'])
 
-    X_test,Y_test=model2.train_model(X, Y)
+        X_test,Y_test=model2.train_model(X, Y)
 
-    if not args.noplots:
-        model2.plot_confusions(X_test,Y_test,target_names)
+        if not config["plots"]:
+            model2.plot_confusions(X_test,Y_test,target_names)
+            metrics2=model2.compute_metrics(X_test,Y_test,target_names)
+            model2.visualize_predictions()
+                
         metrics2=model2.compute_metrics(X_test,Y_test,target_names)
-        model2.visualize_predictions()
-            
-    metrics2=model2.compute_metrics(X_test,Y_test,target_names)
-    model2.save("model_family1_GPC.joblib")
+        if config["save_model"]:
+            model2.save(config["path_to_model_gp"])
 
 
 if __name__ == "__main__":

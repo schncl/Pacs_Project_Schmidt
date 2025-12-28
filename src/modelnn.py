@@ -48,6 +48,7 @@ class ModelNN(BaseModel):
         self.dropout_rate = config.get("dropout_rate", 0.3)
         self.optimizer_name = config.get("optimizer", "adam")
         self.loss_function = config.get("loss_function", "cross_entropy")
+        self.verbose=config.get("verbose",False)
 
 
         self.model = None
@@ -149,9 +150,9 @@ class ModelNN(BaseModel):
             avg_epoch_loss = epoch_loss / len(self.loader)
             train_losses.append(avg_epoch_loss)
 
-  
-            if (epoch + 1) % 50 == 0:
-                print(f'Epoch {epoch+1}/{self.epochs}, Loss: {avg_epoch_loss:.4f}')
+            if self.verbose:
+                if (epoch + 1) % 50 == 0:
+                    print(f'Epoch {epoch+1}/{self.epochs}, Loss: {avg_epoch_loss:.4f}')
 
         self.history['train_losses'] = train_losses
         self.is_trained = True
