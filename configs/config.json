@@ -1,8 +1,8 @@
 {
-    "dataset_file": "heat_dataset_sine_continuous_direct_params.mat",
+    "dataset_path": "../heat_dataset_sine_anisotropic.mat",
     "input_fields": ["kx","ky"],
     "target_fields": ["deg_x","deg_y"],
-
+    
 
     "neural_network": {
         "epochs": 5000,
