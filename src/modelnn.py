@@ -212,7 +212,7 @@ class ModelNN(BaseModel):
     def load(self, filepath):
         """Load a saved model"""
 
-        checkpoint = torch.load(filepath, map_location='cpu')  
+        checkpoint = torch.load(filepath, map_location='cpu',weights_only=False)  
 
 
         config = checkpoint['config']
