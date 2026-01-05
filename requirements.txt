@@ -1,9 +1,7 @@
-numpy
-mat73
-json
-abc
-sklearn
-torch
-joblib
-matplotlib
-seaborn
+numpy>=1.26.4
+torch>=2.7.1
+scikit-learn>=1.6.1
+matplotlib>=3.10.0
+seaborn>=0.13.2
+joblib>=1.5.0
+mat73>=0.65

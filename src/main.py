@@ -46,16 +46,21 @@ def main():
             model.save(config["path_to_model_nn"])
     
     if config["model"] in ["gp","both"]:
+
+
         model2=GPModel(config['gaussian_process'])
+        X=X[:100,:]
+        Y=Y[:100,:]
 
         X_test,Y_test=model2.train_model(X, Y)
+        
 
-        if not config["plots"]:
+        if  config["plots"]:
             model2.plot_confusions(X_test,Y_test,target_names)
             metrics2=model2.compute_metrics(X_test,Y_test,target_names)
             model2.visualize_predictions()
                 
-        metrics2=model2.compute_metrics(X_test,Y_test,target_names)
+
         if config["save_model"]:
             model2.save(config["path_to_model_gp"])
 

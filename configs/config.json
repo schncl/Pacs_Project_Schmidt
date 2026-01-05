@@ -3,11 +3,11 @@
     "input_fields": ["kx","ky"],
     "target_fields": ["deg_x","deg_y"],
     
-    "model":"nn", 
-    "plots":false,
+    "model":"both", 
+    "plots":true,
     "save_model":true,
-    "path_to_model_nn":"../models/model_family1.pt",
-    "path_to_model_gp": "../models/model_family1_GPC.joblib",
+    "path_to_model_nn":"../models/model_heat_nn.pt",
+    "path_to_model_gp": "../models/model_heat_gp.joblib",
 
 
     "neural_network": {
@@ -16,7 +16,7 @@
         "learning_rate": 0.001,
         "hidden_layers": [64, 128],
         "dropout_rate": 0.2,
-        "verbose": false
+        "verbose": true
       },
     
 
