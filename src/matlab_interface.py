@@ -23,16 +23,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 #  Root directory of the project (parent of current_dir)
 project_root = os.path.abspath(os.path.join(current_dir, ".."))
 
-## @var CONFIG_PATH
-#  Full path to the configuration JSON file
-#  Expected location: <project_root>/configs/config.json
-# @note The models are reconstructed starting from the provided json file
-CONFIG_PATH = os.path.join(project_root, "configs", "config.json")
 
 ## @var MODELS_DIR
 #  Directory containing saved model files
 #  Expected location: <project_root>/models/
 MODELS_DIR = os.path.join(project_root, "models")
+
+## @var CONFIG_DIR
+#  Directory containing configurations files
+#  Expected location: <project_root>/config/
+CONFIG_DIR = os.path.join(project_root, "configs")
 
 
 ## @brief Load a trained Neural Network model
@@ -40,20 +40,20 @@ MODELS_DIR = os.path.join(project_root, "models")
 #  Loads a previously trained and saved Neural Network model from memory
 #  Initializes the model architecture using configuration from config.json
 #
-#  @param filepath Name of the model file 
-#    Example: "model_family1.pt" or "experiment_v2.pt"
+#  @param model_name Name of the model file 
+#  @param config_name Path to config_file
 #
 #  @return Loaded ModelNN instance ready for predictions
 #
 #  @note Model architecture is determined by config.json, not the saved file
-def load_model_nn(filepath):
+def load_model_nn(model_name,config_name):
     """Load the model weights"""
     
     global global_model_nn
-    
-    config = load_config(CONFIG_PATH)
+    config_path=os.path.join(CONFIG_DIR, config_name)
+    config = load_config(config_path)
 
-    model_path = os.path.join(MODELS_DIR, filepath)
+    model_path = os.path.join(MODELS_DIR, model_name)
 
     global_model_nn = ModelNN(config['neural_network'])
 
@@ -94,16 +94,17 @@ def predict_nn(model, X):
 #  Loads a previously trained and saved Gaussian Process model from disk.
 #  Initializes GP classifiers using configuration from config.json
 #
-#  @param filepath Name of the model file 
+#  @param model_name Name of the model file 
+#  @param config_name Name of config_file
 #
 #  @return Loaded GPModel instance ready for predictions
-def load_gp_model(filepath):
+def load_gp_model(model_name,config_name):
     """Load the GP model"""
     global global_model_gp
+    file_path=os.path.join(CONFIG_DIR, config_name)
+    config = load_config(file_path)
 
-    config = load_config(CONFIG_PATH)
-
-    model_path = os.path.join(MODELS_DIR, filepath)
+    model_path = os.path.join(MODELS_DIR, model_name)
 
     global_model_gp = GPModel(config['gaussian_process'])
     global_model_gp.load(model_path)
