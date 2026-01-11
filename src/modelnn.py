@@ -178,15 +178,14 @@ class ModelNN(BaseModel):
 
         # Labels Encoding
         self.label_mappings = {}
-        y_train_list = []
-
+        y_train_encoded=np.zeros_like(Y_train)
         for j in range(Y.shape[1]):
             classes = np.unique(Y_train[:, j])
             mapping = {c: idx for idx, c in enumerate(classes)}
             self.label_mappings[j] = mapping
-            y_train_list.append(torch.LongTensor([mapping[v] for v in Y_train[:, j]]))
+            y_train_encoded[:, j] = np.array([mapping[v] for v in Y_train[:, j]])
 
-        y_train_tensor = torch.stack(y_train_list, dim=1)
+        y_train_tensor = torch.LongTensor(y_train_encoded)
 
         # Torch Infrastructure
         train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
@@ -194,7 +193,7 @@ class ModelNN(BaseModel):
         self.loader=train_loader
 
     
-        return  X_train,y_train_tensor,X_test,Y_test
+        return  X_train,y_train_encoded,X_test,Y_test
 
     
     ## @brief Build neural network architecture
