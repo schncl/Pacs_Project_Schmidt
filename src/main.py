@@ -12,7 +12,7 @@ def parse_args():
     parser.add_argument(
         '--config',
         type=str,
-        default="../configs/config.json"
+        default="../configs/config_heat.json"
     )
     return parser.parse_args()
 
@@ -49,12 +49,14 @@ def main():
 
 
         model2=GPModel(config['gaussian_process'])
-        X=X[:100,:]
-        Y=Y[:100,:]
+        if X.shape[0] >= config["samples_gp"]:
+            X = X[:config["samples_gp"], :]
+            Y = Y[:config["samples_gp"], :]
+        else:
+            raise ValueError(f"Not enough samples. Need {config['samples_gp']}, but only have {X.shape[0]}")
 
         X_test,Y_test=model2.train_model(X, Y)
         
-
         if  config["plots"]:
             model2.plot_confusions(X_test,Y_test,target_names)
             metrics2=model2.compute_metrics(X_test,Y_test,target_names)

@@ -1,0 +1,33 @@
+{
+    "dataset_path": "../data/heat_dataset_sine_anisotropic.mat",
+    "input_fields": ["kx","ky"],
+    "target_fields": ["deg_x","deg_y"],
+    
+    "model":"both", 
+    "samples_gp":100,
+    "plots":true,
+    "save_model":true,
+    "path_to_model_nn":"../models/model_heat_nn.pt",
+    "path_to_model_gp": "../models/model_heat_gp.joblib",
+
+
+    "neural_network": {
+        "epochs": 5000,
+        "batch_size": 32,
+        "learning_rate": 0.001,
+        "hidden_layers": [64, 128],
+        "dropout_rate": 0.2,
+        "verbose": true
+      },
+    
+
+    "gaussian_process": {
+        "n_restarts_optimizer": 10,
+        "random_state": 42,
+        "constant_value": 1.0,
+        "constant_bounds": [1e-3, 1e3],
+        "rbf_length_scale": 1.0,
+        "rbf_bounds": [1e-2, 1e2]
+      }
+    
+}
