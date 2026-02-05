@@ -218,7 +218,7 @@ save('my_dataset.mat', 'dataset', '-v7.3');
 
 | Parameter | Description | Default | Range |
 |-----------|-------------|---------|-------|
-| `epochs` | Training iterations | 300 | 50-1000 |
+| `epochs` | Training iterations | 300 | 50-5000 |
 | `batch_size` | Samples per batch | 32 | 8-256 |
 | `learning_rate` | Optimizer step size | 0.001 | 1e-5 to 0.1 |
 | `hidden_layers` | Network architecture | [64, 32] | Any list |
