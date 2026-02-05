@@ -39,12 +39,13 @@ To run the code, navigate to the src folder and run
 ```bash
 python3 main.py --config  ../configs/your_config.json
 ```
-##Documentation
+
+
 To generate the documentation, install doxygen and then run
 ```bash
 doxygen
 ```
-##Tutorial
+Tutorial
 ### 1. Prepare Your Configuration
 
 Create `configs/experiment_name.json`:
