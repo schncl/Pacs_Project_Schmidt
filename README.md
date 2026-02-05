@@ -35,6 +35,10 @@ pip install -r requirement.txt
 
 ## Usage
 
+To run the code, navigate to the src folder and run
+```bash
+python3 main.py --config  ../configs/your_config.json
+```
 ### 1. Prepare Your Configuration
 
 Create `configs/experiment_name.json`:
