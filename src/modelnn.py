@@ -227,8 +227,6 @@ class ModelNN(BaseModel):
     def train_model(self, X, Y):
         """Train the neural network"""
 
-        # Check wether cuda is available
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
         # Preprocess data
@@ -238,7 +236,6 @@ class ModelNN(BaseModel):
         input_dim = X.shape[1]
         num_classes_list = [len(self.label_mappings[i]) for i in sorted(self.label_mappings.keys())]
         self.build_model(input_dim, num_classes_list)
-        self.model.to(device)
 
 
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
@@ -251,8 +248,6 @@ class ModelNN(BaseModel):
         for epoch in range(self.epochs):
             epoch_loss = 0
             for batch_X, batch_Y in self.loader:
-                batch_X = batch_X.to(device)
-                batch_Y = batch_Y.to(device)
 
                 optimizer.zero_grad()
                 outputs = self.model(batch_X)
